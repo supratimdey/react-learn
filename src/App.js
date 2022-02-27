@@ -31,35 +31,54 @@ class App extends React.Component {
     super();
 
     this.state = {
+      searchTerm: "",
       jokes: [],
       isFetchingJoke: false
     };
 
-    this.tellAJoke = this.tellAJoke.bind(this);
+    this.onSearchChange = this.onSearchChange.bind(this);
+    this.onSearchSubmit = this.onSearchSubmit.bind(this);
   }
 
   componentDidMount() {
     this.searchJokes();
   }
 
-  tellAJoke = async () => {
-    this.searchJokes();
-  };
+  onSearchChange(event) {
+    this.setState({ searchTerm: event.target.value });
+  }
 
-  async searchJokes() {
+  onSearchSubmit(event) {
+    event.preventDefault();
+    this.searchJokes();
+  }
+
+  showJokes() {
+    return (
+      <ul>
+        {this.state.jokes.map((joke) => (
+          <li key={joke.id}> {joke.joke} </li>
+        ))}
+      </ul>
+    );
+  }
+
+  async searchJokes(limit = 5) {
     this.setState({ isFetchingJoke: true });
-    const res = await fetch("https://icanhazdadjoke.com/search", {
-      method: "GET",
-      headers: {
-        Accept: "application/json"
+    const res = await fetch(
+      `https://icanhazdadjoke.com/search?term=${this.state.searchTerm}&limit=${limit}`,
+      {
+        method: "GET",
+        headers: {
+          Accept: "application/json"
+        }
       }
-    });
+    );
     const json = await res.json();
     const dadjokes = await json.results;
-    console.log(dadjokes[0].joke);
 
     this.setState({
-      ...dadjokes,
+      jokes: [...dadjokes],
       isFetchingJoke: false
     });
   }
@@ -67,16 +86,23 @@ class App extends React.Component {
   render() {
     return (
       <>
-        <form>
-          <input type="text" placeholder="Enter Search term..." />
+        <form onSubmit={this.onSearchSubmit}>
+          <input
+            type="text"
+            placeholder="Enter Search term..."
+            onChange={this.onSearchChange}
+          />
           <button>Search</button>
-
-          <button onClick={this.tellAJoke} disabled={this.state.isFetchingJoke}>
-            Tell me a joke
+          <button
+            onClick={() => this.searchJokes(1)}
+            disabled={this.state.isFetchingJoke}
+          >
+            I am feeling funny
           </button>
         </form>
-        <p>{this.state.jokes} </p>
+        <p>{this.showJokes()} </p>
         <p> {this.state.isFetchingJoke && "Loading Joke"} </p>
+        <p> search term : {this.state.searchTerm} </p>
       </>
     );
   }
