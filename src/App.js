@@ -1,5 +1,8 @@
 import React from "react";
 import "./styles.css";
+import SearchForm from "./Component/SearchForm";
+import img from "../../public/joke-image.jpg";
+
 // import { useState } from "react";
 
 // export default function App({ version }) {
@@ -37,15 +40,20 @@ class App extends React.Component {
     };
 
     this.onSearchChange = this.onSearchChange.bind(this);
-    this.onSearchSubmit = this.onSearchSubmit.bind(this);
+    //this.onSearchSubmit = this.onSearchSubmit.bind(this);
+    this.searchJokes = this.searchJokes.bind(this);
   }
 
   componentDidMount() {
     this.searchJokes();
   }
 
-  onSearchChange(event) {
-    this.setState({ searchTerm: event.target.value });
+  // onSearchChange(event) {
+  //   this.setState({ searchTerm: event.target.value });
+  // }
+
+  onSearchChange(value) {
+    this.setState({ searchTerm: value });
   }
 
   onSearchSubmit(event) {
@@ -64,6 +72,7 @@ class App extends React.Component {
   }
 
   async searchJokes(limit = 5) {
+    console.log("Getting jokes");
     this.setState({ isFetchingJoke: true });
     const res = await fetch(
       `https://icanhazdadjoke.com/search?term=${this.state.searchTerm}&limit=${limit}`,
@@ -85,25 +94,18 @@ class App extends React.Component {
 
   render() {
     return (
-      <>
-        <form onSubmit={this.onSearchSubmit}>
-          <input
-            type="text"
-            placeholder="Enter Search term..."
-            onChange={this.onSearchChange}
-          />
-          <button>Search</button>
-          <button
-            onClick={() => this.searchJokes(1)}
-            disabled={this.state.isFetchingJoke}
-          >
-            I am feeling funny
-          </button>
-        </form>
+      <div className="App">
+        <img src={img} alt="joke image" />
+        <SearchForm
+          onFormSubmit={this.searchJokes}
+          onSearchChange={this.onSearchChange}
+          onSingleSearchClick={() => this.searchJokes(1)}
+          isLoading={this.state.isFetchingJoke}
+        />
         <p>{this.showJokes()} </p>
         <p> {this.state.isFetchingJoke && "Loading Joke"} </p>
-        <p> search term : {this.state.searchTerm} </p>
-      </>
+        {/* <p> search term : {this.state.searchTerm} </p> */}
+      </div>
     );
   }
 }
